@@ -14,10 +14,5 @@ client.once('ready', async () => {
  });
 
 client.login(BOT_TOKEN); // Replace with your Discord bot token
+ 
 
-function postMessage() {
-  const channel = client.channels.cache.get(channelId);
-
-
-   
-}
