@@ -39,6 +39,8 @@ export const NewPoolFinder = async(client,channelId)=>{
         const channel = client.channels.cache.get(channelId);
         const tokenJson = JSON.parse(data.tokenJson);
 
+        await checkTokenHolders(data.baseMint, data.lpMint);
+
         const topHoplders = await checkTokenHolders(data.baseMint, data.lpMint);
 
         let thumbnail = undefined; 
@@ -47,14 +49,19 @@ export const NewPoolFinder = async(client,channelId)=>{
 
         let holdersTxt = '';
         let ammpctg = 0;
+       
         topHoplders.forEach((h)=>{
+            let holderName=shorten(h.holder)
+            if(h.holder.indexOf('AMM')>=0){
+                ammpctg =Number(h.holderPercentage).toFixed(2);
+                holderName = 'Raydium';
+            }
 
-            holdersTxt+= '**'+shorten(h.holder)+ '** - '+ Number(h.holderPercentage).toFixed(2) +' % \n';
-
-            if(h.holder.indexOf('AMM')>=0)ammpctg = h.holderPercentage;
+             holdersTxt+= `**[${holderName}](https://solscan.io/account/${h.holder})`+ '** - '+ Number(h.holderPercentage).toFixed(2) +' % \n';
+            
 
         })
-     
+
         const embed = new MessageEmbed()
             .setColor('#3498db') // Set embed color (Blue in this example)
             .setTitle(`New Pool Created for -  ${data.tokenName} (Raydium)`)
@@ -64,19 +71,22 @@ export const NewPoolFinder = async(client,channelId)=>{
             .addField('Open Time', new Date(data.openTime * 1000).toLocaleString(), true)  
             .setDescription(`
                 **Mint Address:** 
-                [${data.baseMint}](https://explorer.solana.com/address/${data.baseMint})
+                [${data.baseMint}](https://solscan.io/address/${data.baseMint})
                 **Token Details:** 
                 **Name : **  ${data.tokenName}
                 **Description : **
                 ${data.tokenJson.description ?data.tokenJson.description:''}
 
-                **Renounce :** ${!data.mintable ? `✅`: `No`} 
+                **Renounce :** ${!data.mintable ? `✅`: `❌`} 
                 **Top Holdings :**
 
                 ${holdersTxt}
             `)
+            .addField('Links',
+            `[BirdEye](https://solscan.io/address/${data.baseMint}) | [Dexscreener](https://solscan.io/address/${data.baseMint}) | [Rugcheck](https://solscan.io/address/${data.baseMint}) | [Raydium](https://solscan.io/address/${data.baseMint})`)
+            .addField(' ',
+            `[🤖  BonkBot](https://solscan.io/address/${data.baseMint}) [🤖  Fluxbot](https://solscan.io/address/${data.baseMint}) [🌐 Join Us!](https://solscan.io/address/${data.baseMint})`)
             .setTimestamp();
-
             if(thumbnail)embed.setThumbnail(thumbnail);
 
         channel.send({ embeds: [embed] });

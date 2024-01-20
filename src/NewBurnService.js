@@ -53,11 +53,16 @@ export const NewBurnService = async(client,channelId)=>{
 
         let holdersTxt = '';
         let ammpctg = 0;
+       
         topHoplders.forEach((h)=>{
+            let holderName=shorten(h.holder)
+            if(h.holder.indexOf('AMM')>=0){
+                ammpctg =Number(h.holderPercentage).toFixed(2);
+                holderName = 'Raydium';
+            }
 
-            holdersTxt+= '**'+shorten(h.holder)+ '** - '+ Number(h.holderPercentage).toFixed(2) +' % \n';
-
-            if(h.holder.indexOf('AMM')>=0)ammpctg = h.holderPercentage;
+            holdersTxt+= `**[${holderName}](https://solscan.io/account/${h.holderAddress})`+ '** - '+ Number(h.holderPercentage).toFixed(2) +' % \n';
+            
 
         })
 
@@ -67,13 +72,13 @@ export const NewBurnService = async(client,channelId)=>{
             .setTitle(`LP TOKEN BURNED -  ${tokenJson.symbol} - (Raydium)`)
             .setDescription(`
                 **Mint Address:** 
-                [${data.baseMint}](https://explorer.solana.com/address/${data.baseMint})
+                [${data.baseMint}](https://solscan.io/address/${data.baseMint})
                 **Token Details:** 
                 **Name : **  ${data.tokenName}
                 **Description : **
                 ${data.tokenJson.description ?data.tokenJson.description:''}
 
-                **Renounce :** ${!data.mintable ? `✅`: `No`} 
+                **Renounce :** ${!data.mintable ? `✅`: `❌`} 
                 **Liquidity | Pool Holdings :** 
                 ${data.quoteLiquidity} SOL | ${ammpctg} %
 
@@ -82,7 +87,9 @@ export const NewBurnService = async(client,channelId)=>{
                 ${holdersTxt}
             `)
             .addField('Links',
-            `[BirdEye](https://explorer.solana.com/address/${data.baseMint}) | [Dexscreener](https://explorer.solana.com/address/${data.baseMint}) | [Rugcheck](https://explorer.solana.com/address/${data.baseMint}) | [Raydium](https://explorer.solana.com/address/${data.baseMint})`)
+            `[BirdEye](https://solscan.io/address/${data.baseMint}) | [Dexscreener](https://solscan.io/address/${data.baseMint}) | [Rugcheck](https://solscan.io/address/${data.baseMint}) | [Raydium](https://solscan.io/address/${data.baseMint})`)
+            .addField(' ',
+            `[🤖  BonkBot](https://solscan.io/address/${data.baseMint}) [🤖  Fluxbot](https://solscan.io/address/${data.baseMint}) [🌐 Join Us!](https://solscan.io/address/${data.baseMint})`)
             .setTimestamp();
 
             if(thumbnail)embed.setThumbnail(thumbnail);
@@ -90,7 +97,7 @@ export const NewBurnService = async(client,channelId)=>{
             const button = new MessageButton()
             .setStyle('LINK')
             .setLabel('View on Solana Explorer')
-            .setURL(`https://explorer.solana.com/address/${data.id}`);
+            .setURL(`https://solscan.io/address/${data.id}`);
 
         // Create an action row with the button
         const row = new MessageActionRow().addComponents(button);

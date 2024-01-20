@@ -42,14 +42,18 @@ export const checkTokenHolders = async (token, lpMint) => {
                 const holderPct = 100 * holderVal / total_supply;
                 const known = knownAccounts[holder]
 
+
+                if(holderVal>0)
                 if (known && known.type == 'AMM') {
                     holderData.push({
                         holder: known.name,
+                        holderAddress: holder,
                         holderPercentage: holderPct
                     })
                 } else {
                     holderData.push({
                         holder: holder,
+                        holderAddress: holder,
                         holderPercentage: holderPct
                     })
                 }
