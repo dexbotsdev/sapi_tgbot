@@ -5,11 +5,11 @@ import { NewPoolFinder } from './NewPoolsService.js';
 import { NewBurnService } from './NewBurnService.js';
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
  
-client.once('ready', () => {
+client.once('ready', async () => {
   console.log('Bot is ready!');
 
-  NewPoolFinder(client,newpoolsChannelId);
-  NewBurnService(client,newburnsChannelId);
+ await NewPoolFinder(client,newpoolsChannelId);
+ await NewBurnService(client,newburnsChannelId);
 
  });
 

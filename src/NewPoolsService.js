@@ -15,7 +15,7 @@ export const NewPoolFinder = async(client,channelId)=>{
     })
     
     socket.on('open', () => { 
-        console.log('WebSocket connected'); 
+        console.log('WebSocket connected For NewPools'); 
          
     setInterval(() => {
             if (socket.readyState === WebSocket.OPEN) {
@@ -30,7 +30,7 @@ export const NewPoolFinder = async(client,channelId)=>{
     }
     socket.onmessage = async (msg) => {
        
-       // console.log(msg.data); 
+        console.log(msg.data); 
         if(start ==0 ){
             start =1;
             return;
