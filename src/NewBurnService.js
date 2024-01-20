@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { AUTHTOKEN } from "./config.js";
-import { MessageEmbed } from "discord.js";
-import { checkTokenHolders } from "./utils.js";
+import { MessageEmbed,MessageButton, MessageActionRow} from "discord.js";
+import { checkTokenHolders, shorten } from "./utils.js";
 import { Connection, PublicKey } from '@solana/web3.js';
 
 export const NewBurnService = async(client,channelId)=>{
@@ -10,7 +10,7 @@ export const NewBurnService = async(client,channelId)=>{
     const WSURL="ws://LOCALHOST:8080/subscribe/newBurns"
    let start=0;
 
-    const socket = new WebSocket(WSURL, {
+    const socket = new WebSocket(WSURLPROD, {
         headers: { Authorization: AUTHTOKEN }
     
     })
@@ -45,20 +45,57 @@ export const NewBurnService = async(client,channelId)=>{
 
         await checkTokenHolders(data.baseMint, data.lpMint);
 
+        const topHoplders = await checkTokenHolders(data.baseMint, data.lpMint);
+
+        let thumbnail = undefined; 
+        if(tokenJson)
+        {if(tokenJson.image && tokenJson.image.indexOf('http')>=0)thumbnail = tokenJson.image;}
+
+        let holdersTxt = '';
+        let ammpctg = 0;
+        topHoplders.forEach((h)=>{
+
+            holdersTxt+= '**'+shorten(h.holder)+ '** - '+ Number(h.holderPercentage).toFixed(2) +' % \n';
+
+            if(h.holder.indexOf('AMM')>=0)ammpctg = h.holderPercentage;
+
+        })
+
+     
         const embed = new MessageEmbed()
             .setColor('#3498db') // Set embed color (Blue in this example)
             .setTitle(`LP TOKEN BURNED -  ${tokenJson.symbol} - (Raydium)`)
-            .setThumbnail(tokenJson.image)
-            .addField('Mint Address', `${data.baseMint}`, false)
-            .addField('Token Details \n Name :', `${tokenJson.symbol}`, false)
-            .addField('Description', " "+tokenJson.description)
-            .addField('LP Amount', `${data.lpAmount.toFixed(2)} LP`, true)
-            .addField('Mintable', data.mintable ? 'Yes' : 'No', true)  
-            .addField('Open Time', new Date(data.openTime * 1000).toLocaleString(), true)  
+            .setDescription(`
+                **Mint Address:** 
+                [${data.baseMint}](https://explorer.solana.com/address/${data.baseMint})
+                **Token Details:** 
+                **Name : **  ${data.tokenName}
+                **Description : **
+                ${data.tokenJson.description ?data.tokenJson.description:''}
+
+                **Renounce :** ${!data.mintable ? `✅`: `No`} 
+                **Liquidity | Pool Holdings :** 
+                ${data.quoteLiquidity} SOL | ${ammpctg} %
+
+                **Large Holders :** 
+
+                ${holdersTxt}
+            `)
+            .addField('Links',
+            `[BirdEye](https://explorer.solana.com/address/${data.baseMint}) | [Dexscreener](https://explorer.solana.com/address/${data.baseMint}) | [Rugcheck](https://explorer.solana.com/address/${data.baseMint}) | [Raydium](https://explorer.solana.com/address/${data.baseMint})`)
             .setTimestamp();
 
+            if(thumbnail)embed.setThumbnail(thumbnail);
+ 
+            const button = new MessageButton()
+            .setStyle('LINK')
+            .setLabel('View on Solana Explorer')
+            .setURL(`https://explorer.solana.com/address/${data.id}`);
 
-        channel.send({ embeds: [embed] });
+        // Create an action row with the button
+        const row = new MessageActionRow().addComponents(button);
+ 
+        channel.send({ embeds: [embed], components: [row] });
  
     
     } 
