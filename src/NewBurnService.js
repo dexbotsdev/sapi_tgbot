@@ -1,8 +1,6 @@
 import WebSocket from 'ws';
 import { AUTHTOKEN, TG_BOT_TOKEN } from './config.js';
-import { MessageEmbed, MessageButton, MessageActionRow, MessageReaction } from 'discord.js';
 import { checkTokenHolders, shorten } from './utils.js';
-import { Connection, PublicKey } from '@solana/web3.js';
 import { Telegraf, Markup } from 'telegraf';
 
 export const NewBurnService = async (newburnsChannelId) => {
