@@ -111,7 +111,7 @@ export const NewBurnService = async (newburnsChannelId) => {
 
         // Format data with emojis
         const formattedData = `
-*LP Burned! ${emojis.token} | $${tokenJson.symbol} | RAYDIUM*
+*LP Burned! | $${tokenJson.symbol} | RAYDIUM*
 
 ${emojis.token} *Name:* ${data.tokenName} 
 ${emojis.owner} *Owner:*  [${shorten(data.owner)}](https://solscan.io/account/${data.owner})
