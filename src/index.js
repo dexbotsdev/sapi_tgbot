@@ -8,7 +8,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 client.once('ready', async () => {
   console.log('Bot is ready!');
 
- await NewPoolFinder(client,newpoolsChannelId);
+ //await NewPoolFinder(client,newpoolsChannelId);
  await NewBurnService(client,newburnsChannelId);
 
  });

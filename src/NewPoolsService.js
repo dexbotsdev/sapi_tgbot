@@ -75,7 +75,7 @@ export const NewPoolFinder = async(client,channelId)=>{
                 **Token Details:** 
                 **Name : **  ${data.tokenName}
                 **Description : **
-                ${data.tokenJson.description ?data.tokenJson.description:''}
+                ${tokenJson.description ?tokenJson.description:''}
 
                 **Renounce :** ${!data.mintable ? `✅`: `❌`} 
                 **Top Holdings :**
