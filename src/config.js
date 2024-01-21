@@ -1,12 +1,12 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 
 
-export const newpoolsChannelId="1197749680315056218";
-
-export const newburnsChannelId="1197749731305209876";
+export const newpoolsChannelId="1197749680315056218"; 
+export const newburnsChannelId="-1002063926369";
 export const rugpullsChannelId="1197749760313008200"; 
 
-export const BOT_TOKEN="MTE5Nzc1MDk3MzMzOTI4NzU3NQ.GXUwsv.4-neuKvv0uX1pa545AbKDEE22zXvJOCQ963ZPU" 
+
+export const TG_BOT_TOKEN="6762467361:AAEy3aiZ7L8ANVIuujK9AlxcEZnWZ5ErkRY" 
 export const AUTHTOKEN="SHREE2AUTHJKJGHURT7JDFGHURIWE84HJASDIUR38"
 
 export const RAYDIUM = new PublicKey("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8")
@@ -16,3 +16,4 @@ export const METADATA_2022_PROGRAM_ID = new PublicKey("META4s4fSmpkTbZoUsgC1oBnW
 export const PROGRAM_ID = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
 export const HELIUS_RPC_A='https://mainnet.helius-rpc.com/?api-key=cfd3281b-fabc-4c1f-a18f-1b118e381938'
 export const connection = new Connection(HELIUS_RPC_A,{commitment:'finalized'});
+

@@ -35,7 +35,7 @@ export const checkTokenHolders = async (token, lpMint) => {
 
             if (accountx !=null) {
                 const account = JSON.parse(JSON.stringify(accountx));
-                console.log(JSON.stringify(account,null,2));
+               // console.log(JSON.stringify(account,null,2));
 
                 const holderVal = Number(account.data?.parsed?.info?.tokenAmount.uiAmount);
                 const holder = account.data?.parsed?.info?.owner;
@@ -61,7 +61,7 @@ export const checkTokenHolders = async (token, lpMint) => {
         })
     }
 
-    console.log(holderData);
+   // console.log(holderData);
 
     return holderData;
 }

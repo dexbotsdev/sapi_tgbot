@@ -1,16 +1,30 @@
-import WebSocket from "ws";
-import { AUTHTOKEN } from "./config.js";
-import { MessageEmbed, MessageButton, MessageActionRow, MessageReaction } from "discord.js";
-import { checkTokenHolders, shorten } from "./utils.js";
+import WebSocket from 'ws';
+import { AUTHTOKEN, TG_BOT_TOKEN } from './config.js';
+import { MessageEmbed, MessageButton, MessageActionRow, MessageReaction } from 'discord.js';
+import { checkTokenHolders, shorten } from './utils.js';
 import { Connection, PublicKey } from '@solana/web3.js';
+import { Telegraf, Markup } from 'telegraf';
 
-export const NewBurnService = async (client, channelId) => {
+export const NewBurnService = async (newburnsChannelId) => {
     let tm;
-    const WSURLPROD = "wss://solanaapi.up.railway.app/subscribe/newBurns"
-    const WSURL = "ws://LOCALHOST:8080/subscribe/newBurns"
+    const WSURLPROD = 'wss://spengine.up.railway.app/subscribe/newBurns'
+    const WSURL = 'ws://localhost:8080/subscribe/newBurns'
     let start = 0;
 
-    const socket = new WebSocket(WSURL, {
+    const bot = new Telegraf(TG_BOT_TOKEN);
+
+    bot.launch();
+    bot.start((ctx) => {
+        let message = ` Please use the /start command `
+        ctx.reply(message)
+    })
+
+
+    bot.on('message', (ctx) => {
+        console.log(JSON.stringify(ctx, null, 2));
+    })
+
+    const socket = new WebSocket(WSURLPROD, {
         headers: { Authorization: AUTHTOKEN }
 
     })
@@ -40,8 +54,12 @@ export const NewBurnService = async (client, channelId) => {
             return;
         }
         const data = JSON.parse(msg.data);
-        const channel = client.channels.cache.get(channelId);
         const tokenJson = JSON.parse(data.tokenJson);
+
+        const burned = data.burnedLpAmount;
+        const lpAmount = data.lpAmount;
+
+        if (lpAmount / burned > 2) return;
 
         let baseMint = data.baseMint;
         let quoteLiquidity = data.quoteLiquidity;
@@ -53,7 +71,7 @@ export const NewBurnService = async (client, channelId) => {
         const topHoplders = await checkTokenHolders(baseMint, data.lpMint);
 
         let thumbnail = undefined;
-       // if (tokenJson) { if (tokenJson.image && tokenJson.image.indexOf('http') >= 0) thumbnail = tokenJson.image; }
+        // if (tokenJson) { if (tokenJson.image && tokenJson.image.indexOf('http') >= 0) thumbnail = tokenJson.image; }
 
         let holdersTxt = '';
         let ammpctg = 0;
@@ -72,46 +90,66 @@ export const NewBurnService = async (client, channelId) => {
 
         })
 
-        const embed = new MessageEmbed()
-            .setColor('#3498db') // Set embed color (Blue in this example)
-            .setTitle(`🔥 LP TOKEN BURNED | $${tokenJson.symbol} | Raydium 🔥 `)
-            .setDescription(`
-                **Mint Address:** 
-                [${baseMint}](https://solscan.io/address/${baseMint})
-                **Token Details:** 
-                **Name : **  ${data.tokenName}
-                **Description : **
-                ${tokenJson?.description}
-
-                **Authority renounced :** ${!data.mintable ? `✅` : `❌`} 
-                **Freezing Disabled :** ${!data.freezeAble ? `✅` : `❌`} 
-                
-                **Liquidity | Pool allocation :** 
-                ${quoteLiquidity} SOL | ${ammpctg} %
-
-                Top 10 Holders :
-
-                ${holdersTxt}
-            `)
-            .addField('Links',
-                `[BirdEye](https://solscan.io/address/${data.baseMint}) | [Dexscreener](https://solscan.io/address/${data.baseMint}) | [Rugcheck](https://solscan.io/address/${data.baseMint}) | [Raydium](https://solscan.io/address/${data.baseMint})`)
-            .addField(' ',
-                `[Insta-Buy⚡]( https://t.me/bonkbot_bot?start=ref_vd5bb) [🤖  Fluxbot](https://solscan.io/address/${data.baseMint}) [🌐 Join Us!](https://solscan.io/address/${data.baseMint})`)
-
-            .setTimestamp();
-
-        if (thumbnail) embed.setThumbnail(thumbnail);
 
 
-        const button = new MessageButton()
-            .setStyle('LINK')
-            .setLabel('View on Solana Explorer')
-            .setURL(`https://solscan.io/address/${data.id}`);
+        console.log(data)
 
-        // Create an action row with the button
-        const row = new MessageActionRow().addComponents(button);
+        const emojis = {
+            token: '🚀',
+            id: '🆔',
+            owner: '👤',
+            creationDate: '📅',
+            lpAmount: '💧',
+            baseLiquidity: '🪙',
+            quoteLiquidity: '💲',
+            lpBurned: data.lpBurned ? '🔥' : '❌',
+            rugpulled: data.rugpulled ? '🚨' : '✅',
+            mintable: data.mintable ? '🕵️' : '🕵️',
+            freezeAble: data.freezeAble ? '🕵️' : '🕵️',
+            burnedTime: '🔥⏰',
+        };
 
-        channel.send({ embeds: [embed], components: [row] });
+        // Format data with emojis
+        const formattedData = `
+*LP Burned! ${emojis.token} | $${tokenJson.symbol} | RAYDIUM*
+
+${emojis.token} *Name:* ${data.tokenName} 
+${emojis.owner} *Owner:*  [${shorten(data.owner)}](https://solscan.io/account/${data.owner})
+${emojis.creationDate} *Creation Date:* ${data.creationDate} 
+${emojis.mintable} *Token Renounced:* ${!data.mintable ? '✅' : '❌'} 
+${emojis.freezeAble} *Freeze Account:* ${!data.freezeAble ? '✅' : '❌'} 
+
+${emojis.baseLiquidity} *Liquidity:* ${Number(quoteLiquidity).toFixed(2)} SOL
+ 
+*Top 10 Holders:* 
+${holdersTxt} 
+*More Details:*
+
+${tokenJson.description}
+        `;
+
+        // Send the message
+        bot.telegram.sendMessage(newburnsChannelId, formattedData,
+            {
+                reply_markup:  {
+                    inline_keyboard: [
+                      [{ text: '🍌 Banana', url: 'https://t.me/BananaGunSolana_bot?start=ref_astral'},
+                      { text: '🦄 Unibot', url: 'https://t.me/solana_unibot?start=r-bitce0' }],
+                      [{ text: '⚡ Insta-Buy with Bonkbot', url: `https://t.me/bonkbot_bot?start=ref_vd5bb_ca_${baseMint}`},
+                      { text: '🪐 Solareum', url: 'https://t.me/solareum_bot?start=783d5d66' }],
+                      [{ text: '🤖 SolTradingBot', url: 'https://t.me/SolanaTradingBot?start=XDQq2MvW5'}],
+                    ],
+                  },
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
+            })
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error) => {
+                console.error('Error sending message:', error);
+            });
+
 
 
     }
