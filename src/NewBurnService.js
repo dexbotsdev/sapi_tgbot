@@ -1,6 +1,8 @@
 import WebSocket from 'ws';
 import { AUTHTOKEN, TG_BOT_TOKEN } from './config.js';
+import { MessageEmbed, MessageButton, MessageActionRow, MessageReaction } from 'discord.js';
 import { checkTokenHolders, shorten } from './utils.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { Telegraf, Markup } from 'telegraf';
 
 export const NewBurnService = async (newburnsChannelId) => {
@@ -81,7 +83,7 @@ export const NewBurnService = async (newburnsChannelId) => {
                 holderName = 'Raydium';
             }
             if (cnt > 0)
-                holdersTxt += `[${holderName}](https://solscan.io/account/${h.holderAddress})` + '\t\t:' + Number(h.holderPercentage).toFixed(2) + ' % \n';
+                holdersTxt += `[${holderName}](https://solscan.io/account/${h.holderAddress})` + '\t\t  :' + Number(h.holderPercentage).toFixed(2) + ' % \n';
 
             cnt--;
 
@@ -98,19 +100,18 @@ export const NewBurnService = async (newburnsChannelId) => {
             owner: '👤',
             creationDate: '📅',
             lpAmount: '💧',
-            baseLiquidity: '💲',
+            baseLiquidity: '🪙',
             quoteLiquidity: '💲',
             lpBurned: data.lpBurned ? '🔥' : '❌',
             rugpulled: data.rugpulled ? '🚨' : '✅',
             mintable: data.mintable ? '🕵️' : '🕵️',
             freezeAble: data.freezeAble ? '🕵️' : '🕵️',
             burnedTime: '🔥⏰',
-            fire: '🔥'
         };
 
         // Format data with emojis
         const formattedData = `
-*🔥LP Burned! | $${tokenJson.symbol} | RAYDIUM🔥*
+*LP Burned! ${emojis.token} | $${tokenJson.symbol} | RAYDIUM*
 
 ${emojis.token} *Name:* ${data.tokenName} 
 ${emojis.owner} *Owner:*  [${shorten(data.owner)}](https://solscan.io/account/${data.owner})
@@ -119,11 +120,11 @@ ${emojis.mintable} *Token Renounced:* ${!data.mintable ? '✅' : '❌'}
 ${emojis.freezeAble} *Freeze Account:* ${!data.freezeAble ? '✅' : '❌'} 
 
 ${emojis.baseLiquidity} *Liquidity:* ${Number(quoteLiquidity).toFixed(2)} SOL
-${emojis.baseLiquidity} *Token Address:* \n ${baseMint}
-
+ 
 *Top 10 Holders:* 
 ${holdersTxt} 
 *More Details:*
+
 ${tokenJson.description}
         `;
 
@@ -132,12 +133,11 @@ ${tokenJson.description}
             {
                 reply_markup:  {
                     inline_keyboard: [
-                        [{ text: '⚡ Insta-Buy with Bonkbot', url: `https://t.me/bonkbot_bot?start=ref_vd5bb_ca_${baseMint}`}],
-                      [{ text: '🍌 BananaGun', url: 'https://t.me/BananaGunSolana_bot?start=ref_astral'},
+                      [{ text: '🍌 Banana', url: 'https://t.me/BananaGunSolana_bot?start=ref_astral'},
                       { text: '🦄 Unibot', url: 'https://t.me/solana_unibot?start=r-bitce0' }],
-                      [{ text: '🤖 SolTradingBot', url: 'https://t.me/SolanaTradingBot?start=XDQq2MvW5'},
+                      [{ text: '⚡ Insta-Buy with Bonkbot', url: `https://t.me/bonkbot_bot?start=ref_vd5bb_ca_${baseMint}`},
                       { text: '🪐 Solareum', url: 'https://t.me/solareum_bot?start=783d5d66' }],
-        
+                      [{ text: '🤖 SolTradingBot', url: 'https://t.me/SolanaTradingBot?start=XDQq2MvW5'}],
                     ],
                   },
                 parse_mode: 'Markdown',
